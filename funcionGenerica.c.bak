@@ -1,0 +1,73 @@
+#include<stdio.h>
+#include<string.h>
+#include<stdbool.h>
+#define MAXIMA_CADENA 40
+
+typedef struct {
+	char nombre[MAXIMA_CADENA];
+	int edad;
+}Persona;
+
+void cambiar(void *a, void *b, int width){
+    void *t;
+    t = malloc(width);
+    memcpy(t,a,width);
+    memcpy(a,b,width);
+    memcpy(b,t,width);
+}
+
+void comparar_numeros(void* a, void* b,int i, int j, bool reverse) {
+	float *aa=(float*)a;
+	float *bb=(float*)b;
+	
+	bool estado= reverse? aa[i]<bb[j]:aa[i]>bb[j];
+	if(estado) cambiar(&aa[i],&bb[j],sizeof(aa[i]));
+}
+
+void comparar_personas(void* a, void* b,int i, int j,bool reverse){
+	Persona *p1=(Persona*)a;
+	Persona *p2=(Persona*)b;
+	
+	bool estado= reverse==false?p1[i].nombre[0]>p2[j].nombre[0] : (p1[i].edad>p2[j].edad? false:(p1[i].edad==p2[j].edad?p1[i].nombre[0]>p2[j].nombre[0] :true));
+	if(estado) cambiar(&p1[i],&p2[j],sizeof(p1[i]));	
+}
+
+void ordenar(void *_arr, int size, void (*funcion_comparar)(void*, void*,int, int, bool),bool reverse) {
+	int i,j;
+
+	for (i = 0; i < size-1; i++) {
+		for(j=i+1; j<size; j++){
+			funcion_comparar(_arr, _arr,i,j,reverse);
+		}
+	}
+}
+
+int main(){
+	int i=0;
+	int cantNumeros=12;
+	int cantPersonas=17;
+	float numeros[]={645.41f, 37.59f, 76.41f, 5.31f, -34.23f, 1.11f, 1.10f, 23.46f, 635.47f, -876.32f, 467.83f, 62.25f};
+	Persona personas[]={{"Hal", 20},{"Susann",31},{"Dwight",19},{"Kassandra",21},{"Lawrence",25},{"Cindy",22},{"Cory",27},
+	{"Mac",19},{"Romana",27},{"Doretha",32},{"Danna",20},{"Zara",23},{"Rosalyn",26},{"Risa",24},{"Benny",28},{"Juan",33},{"Natalie",25}};
+	
+	
+	printf("Ordenar numeros en ascendiente por el valor del numero\n");
+	ordenar(numeros, cantNumeros,comparar_numeros,false);
+	for(i=0; i<cantNumeros; i++){
+		printf("%.2f ",numeros[i]);
+	}
+	
+	printf("\n\nOrdenar las personas en orden alfabetico (lexicographically) por nomber\n");
+	ordenar(personas, cantPersonas,comparar_personas,false);
+	for(i=0; i<cantPersonas; i++){
+		printf("(%s,%d) ",personas[i].nombre, personas[i].edad);
+	}
+	
+	printf("\n\nOrdernar las personas en orden descendiente por edad, donde una persona de la misma edad deberia estar ordenada en orden alfabetico (lexicographically)\n");
+	ordenar(personas, cantPersonas,comparar_personas,true);
+	for(i=0; i<cantPersonas; i++){
+		printf("(%s,%d) ",personas[i].nombre, personas[i].edad);
+	}
+
+	return 0;
+}
